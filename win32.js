@@ -18,13 +18,13 @@ function getWindowsCommandPath() {
 }
 
 function getAllInstalledSoftwares() {
-    let softwares = [];
-    let queryString64 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';
-    let queryString32 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';
+    var softwareList = [];
+    var queryString64 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';
+    var queryString32 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';
 
-    let fullList = execSync(queryString32).toString() + execSync(queryString64).toString();
+    var fullList = execSync(queryString32).toString() + execSync(queryString64).toString();
     fullList.split('HKEY_LOCAL_MACHINE').removeFirst().forEach(function (softwareBlock) {
-        let softwareObject = {};
+        var softwareObject = {};
 
         softwareBlock.split(/\r?\n/).removeFirst().forEach(function (infoLine) {
             var infoTokens = infoLine.split(/ +/).removeFirst();
@@ -32,8 +32,8 @@ function getAllInstalledSoftwares() {
                 softwareObject[infoTokens[0]] = infoTokens[2];
             }
         });
-        softwares.push(softwareObject);
+        softwareList.push(softwareObject);
     });
 
-    return softwares;
+    return softwareList;
 }
