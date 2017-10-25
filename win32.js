@@ -1,7 +1,7 @@
 const {execSync} = require('child_process');
 
 module.exports = exports = {
-    getAllInstalledSoftwares: getAllInstalledSoftwares
+    getAllInstalledSoftware: getAllInstalledSoftware
 };
 
 Array.prototype.removeFirst = function() {
@@ -17,7 +17,7 @@ function getWindowsCommandPath() {
     }
 }
 
-function getAllInstalledSoftwares() {
+function getAllInstalledSoftware() {
     var softwareList = [];
     var queryString64 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';
     var queryString32 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';

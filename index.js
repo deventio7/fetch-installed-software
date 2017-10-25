@@ -1,13 +1,13 @@
 const win32 = require('./win32.js');
 
 module.exports = exports = {
-    getAllInstalledSoftwares: getAllInstalledSoftwares,
+    getAllInstalledSoftware: getAllInstalledSoftware,
 }
 
-function getAllInstalledSoftwares() {
+function getAllInstalledSoftware() {
     var getters = {
         darwin: unimplemented,
-        win32: win32.getAllInstalledSoftwares,
+        win32: win32.getAllInstalledSoftware,
         linux: unimplemented,
         freebsd: unimplemented
     };
