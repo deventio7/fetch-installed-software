@@ -1,8 +1,8 @@
 const win32 = require('./win32.js');
 
 module.exports = exports = {
-    getAllInstalledSoftware: getAllInstalledSoftware,
-}
+    getAllInstalledSoftware: getAllInstalledSoftware
+};
 
 function getAllInstalledSoftware() {
     var getters = {

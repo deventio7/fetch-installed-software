@@ -22,18 +22,27 @@ function getAllInstalledSoftware() {
     var queryString64 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';
     var queryString32 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';
 
-    var fullList = execSync(queryString32).toString() + execSync(queryString64).toString();
-    fullList.split('HKEY_LOCAL_MACHINE').removeFirst().forEach(function (softwareBlock) {
+    var fullList = execSync(queryString32).toString().trim() + execSync(queryString64).toString().trimRight();
+
+    fullList.split(/^HKEY_LOCAL_MACHINE.*$/).forEach(function (softwareBlock) {
         var softwareObject = {};
+        var lastKey = '';
+        var lastValue = '';
 
         softwareBlock.split(/\r?\n/).removeFirst().forEach(function (infoLine) {
-            var infoTokens = infoLine.split(/ +/).removeFirst();
-            if (infoTokens[2]) {
-                softwareObject[infoTokens[0]] = infoTokens[2];
+            if (infoLine.trim()) {
+                var infoTokens = infoLine.match(/^\s+(.+?)\s+REG_[^ ]+\s*(.*)/);
+                if (infoTokens) {
+                    infoTokens = infoTokens.removeFirst();
+                    lastKey = infoTokens[0];
+                    lastValue = infoTokens[1];
+                } else {
+                    lastValue = lastValue + '\n' + infoLine;
+                }
+                softwareObject[lastKey] = lastValue;
             }
         });
         softwareList.push(softwareObject);
     });
-
     return softwareList;
 }
