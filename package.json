@@ -1,6 +1,6 @@
 {
   "name": "fetch-installed-software",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Provides functions to fetch information about software installed on the machine",
   "keywords": [
     "installed",

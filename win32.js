@@ -24,12 +24,14 @@ function getAllInstalledSoftware() {
 
     var fullList = execSync(queryString32).toString().trim() + execSync(queryString64).toString().trimRight();
 
-    fullList.split(/^HKEY_LOCAL_MACHINE.*$/).forEach(function (softwareBlock) {
+    fullList.split(/^HKEY_LOCAL_MACHINE/m).removeFirst().forEach(function (softwareBlock, i) {
         var softwareObject = {};
         var lastKey = '';
         var lastValue = '';
 
-        softwareBlock.split(/\r?\n/).removeFirst().forEach(function (infoLine) {
+        var softwareLines = softwareBlock.split(/\r?\n/);
+        softwareObject['RegistryDirName'] = softwareLines.shift().match(/^(\\[^\\]+)*?\\([^\\]+)\s*$/)[2];
+        softwareLines.forEach(function (infoLine) {
             if (infoLine.trim()) {
                 var infoTokens = infoLine.match(/^\s+(.+?)\s+REG_[^ ]+\s*(.*)/);
                 if (infoTokens) {
