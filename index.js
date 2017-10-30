@@ -16,5 +16,5 @@ function getAllInstalledSoftware() {
 }
 
 function unimplemented() {
-    return [];
+    throw {message: 'fetch-installed-software module does not currently support this architecture.'};
 }
