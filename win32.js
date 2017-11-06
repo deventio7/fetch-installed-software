@@ -1,7 +1,15 @@
-const {execSync} = require('child_process');
+const {exec, execSync} = require('child_process');
 
 module.exports = exports = {
+    getAllInstalledSoftwareSync: getAllInstalledSoftwareSync,
     getAllInstalledSoftware: getAllInstalledSoftware
+};
+
+const MAX_BUFFER_SIZE = 1024 * 5000;
+
+const queryStrings = {
+    '32': getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s',
+    '64': getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s'
 };
 
 Array.prototype.removeFirst = function() {
@@ -18,22 +26,52 @@ function getWindowsCommandPath() {
 }
 
 function getAllInstalledSoftware() {
-    var softwareList = [];
-    var queryString64 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';
-    var queryString32 = getWindowsCommandPath() + '\\REG QUERY HKLM\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ /s';
+    return new Promise ((resolve, reject) => {
+        const resolvers = {};
+        const rejectors = {};
+        const execPromises = {};
 
-    var fullList = execSync(queryString32).toString().trim() + execSync(queryString64).toString().trimRight();
+        ['32', '64'].forEach(arch => {
+            execPromises[arch] = new Promise((execRes, execRej) => {
+                resolvers[arch] = execRes;
+                rejectors[arch] = execRej;
+            });
 
-    fullList.split(/^HKEY_LOCAL_MACHINE/m).removeFirst().forEach(function (softwareBlock, i) {
-        var softwareObject = {};
-        var lastKey = '';
-        var lastValue = '';
+            exec(queryStrings[arch], {maxBuffer: MAX_BUFFER_SIZE}, (err, stdout, stderr) => {
+                if (!err) {
+                    resolvers[arch](stdout.toString());
+                } else {
+                    rejectors[arch](stderr.toString());
+                }
+            });
+        });
 
-        var softwareLines = softwareBlock.split(/\r?\n/);
+        Promise.all([execPromises['32'], execPromises['64']]).then(resultsArray => {
+            const fullList = resultsArray[0].trim() + resultsArray[1].trimRight();
+            resolve(processCmdOutput(fullList));
+        }).catch(error => {
+            reject(error);
+        });
+    })
+}
+
+function getAllInstalledSoftwareSync() {
+    const fullList = execSync(queryStrings['32']).toString().trim() + execSync(queryStrings['64']).toString().trimRight();
+    return processCmdOutput(fullList);
+}
+
+function processCmdOutput(fullList) {
+    const softwareList = [];
+    fullList.split(/^HKEY_LOCAL_MACHINE/m).removeFirst().forEach(softwareBlock => {
+        const softwareObject = {};
+        let lastKey = '';
+        let lastValue = '';
+
+        const softwareLines = softwareBlock.split(/\r?\n/);
         softwareObject['RegistryDirName'] = softwareLines.shift().match(/^(\\[^\\]+)*?\\([^\\]+)\s*$/)[2];
-        softwareLines.forEach(function (infoLine) {
+        softwareLines.forEach(infoLine => {
             if (infoLine.trim()) {
-                var infoTokens = infoLine.match(/^\s+(.+?)\s+REG_[^ ]+\s*(.*)/);
+                let infoTokens = infoLine.match(/^\s+(.+?)\s+REG_[^ ]+\s*(.*)/);
                 if (infoTokens) {
                     infoTokens = infoTokens.removeFirst();
                     lastKey = infoTokens[0];
