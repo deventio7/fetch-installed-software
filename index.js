@@ -28,5 +28,5 @@ function getAllInstalledSoftwareSync() {
 }
 
 function unimplemented() {
-    throw {message: 'fetch-installed-software module does not currently support this architecture.'};
+    throw new Error('fetch-installed-software module does not currently support this platform.');
 }
