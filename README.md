@@ -1,4 +1,6 @@
-**Get metadata of software installed on the machine.**
+# Fetch installed Software
+
+**A Node library to get the metadata of software installed on a Windows machine.**
 
 ## Use cases
 - Software restrictions
@@ -15,9 +17,9 @@ npm install fetch-installed-software
 ```
 
 ## Usage
+
 ### Function: getAllInstalledSoftware()
 - Returns an array of Objects, each containing metadata about a piece of software installed on the machine
 
 ## Caveats
-
 - Implementation only currently supports Windows systems
