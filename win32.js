@@ -14,11 +14,6 @@ const getQueryStringArray = () => {
     }
 };
 
-Array.prototype.removeFirst = function() {
-    this.shift();
-    return this;
-};
-
 const getWindowsCommandPath = () => {
     if (process.arch === 'ia32' && process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432')) {
         return '%windir%\\sysnative\\cmd.exe /c %windir%\\System32'
@@ -71,7 +66,8 @@ const getAllInstalledSoftwareSync = () => {
 
 const processCmdOutput = (fullList) => {
     const softwareList = [];
-    fullList.split(/^HKEY_LOCAL_MACHINE/m).removeFirst().forEach(softwareBlock => {
+    fullList.split(/^HKEY_LOCAL_MACHINE/m).forEach((softwareBlock, index) => {
+        if(index==0) return;
         const softwareObject = {};
         let lastKey = '';
         let lastValue = '';
@@ -82,7 +78,7 @@ const processCmdOutput = (fullList) => {
             if (infoLine.trim()) {
                 let infoTokens = infoLine.match(/^\s+(.+?)\s+REG_[^ ]+\s*(.*)/);
                 if (infoTokens) {
-                    infoTokens = infoTokens.removeFirst();
+                    infoTokens.shift();
                     lastKey = infoTokens[0];
                     lastValue = infoTokens[1];
                 } else {
